@@ -2,7 +2,7 @@
 
 **Simple Summary**
 
-An onchain standard surrounding the metadata of collections which eradicates the possibility of NFTs within the collection being replicated and other forms of market manipulation and attacks.
+An onchain standard surrounding the metadata of collections which eradicates the possibility of NFTs within the collection being replicated and other forms of market manipulation and attacks. In addition, a proposed upgrade to Metaplex token program.
 
 **Abstract**
 
