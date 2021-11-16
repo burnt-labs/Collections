@@ -1,9 +1,9 @@
 use crate::errors::CollectionError;
+use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::AccountInfo, borsh::try_from_slice_unchecked, entrypoint::ProgramResult,
     program_error::ProgramError, pubkey::Pubkey,
 };
-use borsh::{BorshDeserialize, BorshSerialize};
 use std::mem;
 
 pub mod add_member;
