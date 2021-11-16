@@ -1,15 +1,13 @@
 use crate::errors::CollectionError;
-use {
-    solana_program::{
-        msg,
-        account_info::{AccountInfo},
-        pubkey::Pubkey,
-        entrypoint::ProgramResult,
-        system_instruction,
-        program_error::ProgramError,
-        sysvar::{rent::Rent},
-        program::{invoke, invoke_signed}
-    },
+use solana_program::{
+    account_info::AccountInfo,
+    entrypoint::ProgramResult,
+    msg,
+    program::{invoke, invoke_signed},
+    program_error::ProgramError,
+    pubkey::Pubkey,
+    system_instruction,
+    sysvar::rent::Rent,
 };
 
 pub fn assert_owned_by(account: &AccountInfo, owner: &Pubkey) -> ProgramResult {
@@ -25,7 +23,6 @@ pub fn assert_owned_by(account: &AccountInfo, owner: &Pubkey) -> ProgramResult {
         Ok(())
     }
 }
-
 
 #[inline(always)]
 pub fn create_or_allocate_account_raw<'a>(
