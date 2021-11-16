@@ -1,20 +1,7 @@
-use solana_program::{
-    account_info::AccountInfo, entrypoint, entrypoint::ProgramResult, msg, pubkey::Pubkey,
-};
+pub mod entrypoint;
+pub mod errors;
+pub mod processor;
+pub mod instruction;
+mod utils;
 
-solana_program::declare_id!("BpfProgram1111111111111111111111111111111111");
-
-entrypoint!(process_instruction);
-pub fn process_instruction(
-    program_id: &Pubkey,
-    accounts: &[AccountInfo],
-    instruction_data: &[u8],
-) -> ProgramResult {
-    msg!(
-        "process_instruction: {}: {} accounts, data={:?}",
-        program_id,
-        accounts.len(),
-        instruction_data
-    );
-    Ok(())
-}
+pub const PREFIX: &str = "collection";
