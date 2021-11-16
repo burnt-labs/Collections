@@ -1,21 +1,24 @@
 use crate::errors::CollectionError;
-use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{
-    account_info::AccountInfo, borsh::try_from_slice_unchecked, entrypoint::ProgramResult,
-    program_error::ProgramError, pubkey::Pubkey,
-};
 use std::mem;
+use solana_program::{
+    account_info::AccountInfo,
+    program_error::ProgramError,
+    pubkey::Pubkey,
+    entrypoint::ProgramResult,
+    borsh::try_from_slice_unchecked,
+};
 
-pub mod add_member;
-pub mod add_member_of;
-pub mod arrange_member;
 pub mod create_collection;
+pub mod add_member;
 pub mod remove_member;
+pub mod arrange_member;
+pub mod add_member_of;
 
-pub use add_member::*;
-pub use arrange_member::*;
 pub use create_collection::*;
+pub use add_member::*;
 pub use remove_member::*;
+pub use arrange_member::*;
+
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -24,9 +27,7 @@ pub fn process_instruction(
 ) -> ProgramResult {
     use crate::instruction::CollectionInstruction;
     match CollectionInstruction::try_from_slice(input)? {
-        CollectionInstruction::CreateCollection(args) => {
-            create_collection(program_id, accounts, args)
-        }
+        CollectionInstruction::CreateCollection(args) => create_collection(program_id, accounts, args),
         CollectionInstruction::AddMember(args) => add_member(program_id, accounts, args),
         CollectionInstruction::RemoveMember(args) => remove_member(program_id, accounts, args),
         CollectionInstruction::ArrangeMember(args) => arrange_member(program_id, accounts, args),
@@ -54,6 +55,7 @@ pub struct CollectionData {
 }
 
 impl CollectionData {
+
     // todo(mvid): don't deserialize entire collection
     pub fn get_members(a: &AccountInfo) -> Vec<Pubkey> {
         let collection = CollectionData::from_account_info(a)?;

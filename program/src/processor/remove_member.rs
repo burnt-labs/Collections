@@ -1,16 +1,20 @@
+
 use crate::{
-    processor::{CollectionData, CollectionError},
-    utils::assert_owned_by,
+    processor::{
+        CollectionData,
+        CollectionError
+    },
+    utils::assert_owned_by
 };
 
 use {
     borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
-        account_info::{next_account_info, AccountInfo},
-        entrypoint::ProgramResult,
         msg,
-        program_error::ProgramError,
         pubkey::Pubkey,
+        account_info::{AccountInfo, next_account_info},
+        entrypoint::ProgramResult,
+        program_error::ProgramError,
     },
 };
 
@@ -51,6 +55,7 @@ fn parse_accounts<'a, 'b: 'a>(
     Ok(accounts)
 }
 
+
 pub fn remove_member(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -63,7 +68,7 @@ pub fn remove_member(
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
     if !collection.removable {
-        return Err(CollectionError::NotRemovable);
+        return Err(CollectionError::NotRemovable)
     } else {
         // assert the member asset at the index is the correct asset
         let asset_at_index = collection.members.get(args.index)?;

@@ -1,9 +1,16 @@
-use crate::processor::{CollectionData, CollectionSignature, BASE_COLLECTION_DATA_SIZE};
-use crate::{errors::CollectionError, utils::create_or_allocate_account_raw, PREFIX};
+use crate::{
+    errors::CollectionError, PREFIX,
+    utils::create_or_allocate_account_raw,
+};
+use crate::processor::{BASE_COLLECTION_DATA_SIZE, CollectionData, CollectionSignature};
 use {
     solana_program::{
-        account_info::next_account_info, account_info::AccountInfo, entrypoint::ProgramResult, msg,
-        program_error::ProgramError, pubkey::Pubkey,
+        account_info::AccountInfo,
+        entrypoint::ProgramResult,
+        msg,
+        pubkey::Pubkey,
+        program_error::ProgramError,
+        account_info::{next_account_info}
     },
     std::mem,
 };
@@ -34,6 +41,7 @@ struct Accounts<'a, 'b: 'a> {
     rent: &'a AccountInfo<'b>,
     system: &'a AccountInfo<'b>,
 }
+
 
 fn parse_accounts<'a, 'b: 'a>(
     program_id: &Pubkey,
@@ -71,16 +79,17 @@ pub fn create_collection(
     let mut account_size = BASE_COLLECTION_DATA_SIZE;
     if args.expandable > 0 {
         if args.members.len() > args.expandable as usize {
-            return Err(CollectionError::CapacityExceeded);
+            return Err(CollectionError::CapacityExceeded)
         }
 
         account_size += args.expandable * mem::size_of::<Pubkey>();
     } else {
         if args.members.len() == 0 {
-            return Err(CollectionError::PermanentlyEmptyCollection);
+            return Err(CollectionError::PermanentlyEmptyCollection)
         }
         account_size += args.members.len() * mem::size_of::<Pubkey>();
     }
+
 
     create_or_allocate_account_raw(
         *program_id,
@@ -106,7 +115,7 @@ pub fn create_collection(
         members: args.members.clone(),
         member_of: args.member_of.clone(),
     }
-    .serialize(&mut *accounts.collection.data.borrow_mut())?;
+        .serialize(&mut *accounts.collection.data.borrow_mut())?;
 
     Ok(())
 }

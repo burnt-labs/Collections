@@ -1,17 +1,24 @@
 use {
-    borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
-        account_info::{next_account_info, AccountInfo},
-        entrypoint::ProgramResult,
+        account_info::{
+            AccountInfo,
+            next_account_info,
+        },
         msg,
-        program_error::ProgramError,
         pubkey::Pubkey,
+        entrypoint::ProgramResult,
+        program_error::ProgramError,
     },
+    borsh::{BorshDeserialize, BorshSerialize}
 };
 
+
 use crate::{
-    processor::{CollectionData, CollectionError},
-    utils::assert_owned_by,
+    processor::{
+        CollectionData,
+        CollectionError
+    },
+    utils::assert_owned_by
 };
 
 #[repr(C)]
@@ -60,9 +67,9 @@ pub fn add_member(
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
     if collection.expandable == 0 {
-        return Err(CollectionError::NotExpandable);
+        return Err(CollectionError::NotExpandable)
     } else if collection.expandable == collection.members.len() {
-        return Err(CollectionError::CapacityExceeded);
+        return Err(CollectionError::CapacityExceeded)
     }
 
     // append the member to the collection
