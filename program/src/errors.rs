@@ -45,7 +45,6 @@ pub enum CollectionError {
     InvalidNewArrangeIndex,
 }
 
-
 impl PrintProgramError for CollectionError {
     fn print<E>(&self) {
         msg!(&self.to_string());

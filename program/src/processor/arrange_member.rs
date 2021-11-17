@@ -1,23 +1,17 @@
 use {
-    solana_program::{
-        account_info::{
-            AccountInfo,
-            next_account_info,
-        },
-        msg,
-        pubkey::Pubkey,
-        program_error::ProgramError,
-        entrypoint::ProgramResult,
-    },
     borsh::{BorshDeserialize, BorshSerialize},
+    solana_program::{
+        account_info::{next_account_info, AccountInfo},
+        entrypoint::ProgramResult,
+        msg,
+        program_error::ProgramError,
+        pubkey::Pubkey,
+    },
 };
 
 use crate::{
-    processor::{
-        CollectionData,
-        CollectionError
-    },
-    utils::assert_owned_by
+    processor::{CollectionData, CollectionError},
+    utils::assert_owned_by,
 };
 
 #[repr(C)]
@@ -55,7 +49,6 @@ fn parse_accounts<'a, 'b: 'a>(
     Ok(accounts)
 }
 
-
 pub fn arrange_member(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
@@ -65,18 +58,18 @@ pub fn arrange_member(
     let accounts = parse_accounts(program_id, accounts)?;
 
     if args.old_index == args.new_index {
-        return Ok(())
+        return Ok(());
     }
 
     // assert the collection can add members
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
     if !collection.arrangeable {
-        return Err(CollectionError::NotArrangeable)
+        return Err(CollectionError::NotArrangeable);
     } else if args.old_index >= collection.members.len() {
-        return Err(CollectionError::InvalidOriginalArrangeIndex)
+        return Err(CollectionError::InvalidOriginalArrangeIndex);
     } else if args.new_index >= collection.members.len() {
-        return Err(CollectionError::InvalidNewArrangeIndex)
+        return Err(CollectionError::InvalidNewArrangeIndex);
     }
 
     // arrange the member in the collection

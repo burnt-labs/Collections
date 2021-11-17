@@ -1,25 +1,16 @@
 use {
+    borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
-        account_info::{
-            AccountInfo,
-            next_account_info,
-        },
-        msg,
-        pubkey::Pubkey,
+        account_info::{next_account_info, AccountInfo},
         entrypoint::ProgramResult,
+        msg,
         program_error::ProgramError,
+        pubkey::Pubkey,
     },
-    borsh::{BorshDeserialize, BorshSerialize}
 };
 
-
-use crate::{
-    processor::{
-        CollectionData,
-    },
-    utils::assert_owned_by
-};
 use crate::processor::CollectionSignature;
+use crate::{processor::CollectionData, utils::assert_owned_by};
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
@@ -67,7 +58,7 @@ pub fn add_member_of(
     // assert the collection can add members
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
-    let collection_signature = CollectionSignature{
+    let collection_signature = CollectionSignature {
         collection: accounts.member_of_collection.key(),
         signature: args.signature,
     };
