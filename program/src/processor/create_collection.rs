@@ -17,6 +17,8 @@ use {
 
 #[repr(C)]
 #[derive(Clone)]
+
+// TODO: Modify this so it satisfies Borsh Serialize and deserialize
 pub struct CreateCollectionArgs {
     // The name of the Collection
     pub name: [u8; 32],
