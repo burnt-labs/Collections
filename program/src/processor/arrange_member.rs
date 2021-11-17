@@ -26,9 +26,6 @@ pub struct ArrangeMemberArgs {
 
 struct Accounts<'a, 'b: 'a> {
     collection: &'a AccountInfo<'b>,
-    payer: &'a AccountInfo<'b>,
-    rent: &'a AccountInfo<'b>,
-    system: &'a AccountInfo<'b>,
 }
 
 fn parse_accounts<'a, 'b: 'a>(
@@ -38,9 +35,6 @@ fn parse_accounts<'a, 'b: 'a>(
     let account_iter = &mut accounts.iter();
     let accounts = Accounts {
         collection: next_account_info(account_iter)?,
-        payer: next_account_info(account_iter)?,
-        rent: next_account_info(account_iter)?,
-        system: next_account_info(account_iter)?,
     };
 
     // assert the function is called by the collection owner
@@ -65,11 +59,11 @@ pub fn arrange_member(
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
     if !collection.arrangeable {
-        return Err(CollectionError::NotArrangeable);
+        return Err(CollectionError::NotArrangeable.into());
     } else if args.old_index >= collection.members.len() {
-        return Err(CollectionError::InvalidOriginalArrangeIndex);
+        return Err(CollectionError::InvalidOriginalArrangeIndex.into());
     } else if args.new_index >= collection.members.len() {
-        return Err(CollectionError::InvalidNewArrangeIndex);
+        return Err(CollectionError::InvalidNewArrangeIndex.into());
     }
 
     // arrange the member in the collection

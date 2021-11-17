@@ -7,8 +7,9 @@ use solana_program::{
     program_error::ProgramError,
     pubkey::Pubkey,
     system_instruction,
-    sysvar::rent::Rent,
+    sysvar::{rent::Rent, Sysvar},
 };
+use std::convert::TryInto;
 
 pub fn assert_owned_by(account: &AccountInfo, owner: &Pubkey) -> ProgramResult {
     if account.owner != owner {

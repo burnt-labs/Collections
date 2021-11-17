@@ -1,6 +1,7 @@
 use crate::processor::{CollectionData, CollectionSignature, BASE_COLLECTION_DATA_SIZE};
 use crate::{errors::CollectionError, utils::create_or_allocate_account_raw, PREFIX};
 use {
+    borsh::{BorshDeserialize, BorshSerialize},
     solana_program::{
         account_info::next_account_info, account_info::AccountInfo, entrypoint::ProgramResult, msg,
         program_error::ProgramError, pubkey::Pubkey,
@@ -9,7 +10,7 @@ use {
 };
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
 pub struct CreateCollectionArgs {
     // The name of the Collection
     pub name: [u8; 32],
@@ -36,7 +37,7 @@ struct Accounts<'a, 'b: 'a> {
 }
 
 fn parse_accounts<'a, 'b: 'a>(
-    program_id: &Pubkey,
+    _: &Pubkey,
     accounts: &'a [AccountInfo<'b>],
 ) -> Result<Accounts<'a, 'b>, ProgramError> {
     let account_iter = &mut accounts.iter();
@@ -46,6 +47,8 @@ fn parse_accounts<'a, 'b: 'a>(
         rent: next_account_info(account_iter)?,
         system: next_account_info(account_iter)?,
     };
+
+
     Ok(accounts)
 }
 
@@ -57,11 +60,7 @@ pub fn create_collection(
     msg!("+ Processing CreateCollection");
     let accounts = parse_accounts(program_id, accounts)?;
 
-    let collection_path = [
-        PREFIX.as_bytes(),
-        program_id.as_ref(),
-        &args.resource.to_bytes(),
-    ];
+    let collection_path = [PREFIX.as_bytes(), program_id.as_ref()];
 
     let (collection_key, bump) = Pubkey::find_program_address(&collection_path, program_id);
     if collection_key != *accounts.collection.key {
@@ -71,13 +70,13 @@ pub fn create_collection(
     let mut account_size = BASE_COLLECTION_DATA_SIZE;
     if args.expandable > 0 {
         if args.members.len() > args.expandable as usize {
-            return Err(CollectionError::CapacityExceeded);
+            return Err(CollectionError::CapacityExceeded.into());
         }
 
-        account_size += args.expandable * mem::size_of::<Pubkey>();
+        account_size += args.expandable as usize * mem::size_of::<Pubkey>();
     } else {
         if args.members.len() == 0 {
-            return Err(CollectionError::PermanentlyEmptyCollection);
+            return Err(CollectionError::PermanentlyEmptyCollection.into());
         }
         account_size += args.members.len() * mem::size_of::<Pubkey>();
     }
@@ -89,12 +88,7 @@ pub fn create_collection(
         accounts.system,
         accounts.payer,
         account_size,
-        &[
-            PREFIX.as_bytes(),
-            program_id.as_ref(),
-            &args.resource.to_bytes(),
-            &[bump],
-        ],
+        &[PREFIX.as_bytes(), program_id.as_ref(), &[bump]],
     )?;
 
     CollectionData {

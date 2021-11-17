@@ -23,9 +23,6 @@ pub struct AddMemberOfArgs {
 struct Accounts<'a, 'b: 'a> {
     collection: &'a AccountInfo<'b>,
     member_of_collection: &'a AccountInfo<'b>,
-    payer: &'a AccountInfo<'b>,
-    rent: &'a AccountInfo<'b>,
-    system: &'a AccountInfo<'b>,
 }
 
 fn parse_accounts<'a, 'b: 'a>(
@@ -36,9 +33,6 @@ fn parse_accounts<'a, 'b: 'a>(
     let accounts = Accounts {
         collection: next_account_info(account_iter)?,
         member_of_collection: next_account_info(account_iter)?,
-        payer: next_account_info(account_iter)?,
-        rent: next_account_info(account_iter)?,
-        system: next_account_info(account_iter)?,
     };
 
     // assert the function is called by the collection owner
@@ -59,7 +53,7 @@ pub fn add_member_of(
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
     let collection_signature = CollectionSignature {
-        collection: accounts.member_of_collection.key(),
+        collection: accounts.member_of_collection.key.clone(),
         signature: args.signature,
     };
 

@@ -13,6 +13,7 @@ pub mod create_collection;
 pub mod remove_member;
 
 pub use add_member::*;
+pub use add_member_of::*;
 pub use arrange_member::*;
 pub use create_collection::*;
 pub use remove_member::*;
@@ -30,6 +31,7 @@ pub fn process_instruction(
         CollectionInstruction::AddMember(args) => add_member(program_id, accounts, args),
         CollectionInstruction::RemoveMember(args) => remove_member(program_id, accounts, args),
         CollectionInstruction::ArrangeMember(args) => arrange_member(program_id, accounts, args),
+        CollectionInstruction::AddMemberOf(args) => add_member_of(program_id, accounts, args),
     }
 }
 
@@ -43,6 +45,8 @@ pub struct CollectionSignature {
 // todo(mvid): update this when struct finalized
 pub const BASE_COLLECTION_DATA_SIZE: usize = 32 + 32 + 1 + 8;
 
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq, Debug)]
 pub struct CollectionData {
     pub name: [u8; 32],
     pub description: [u8; 32],
@@ -55,9 +59,9 @@ pub struct CollectionData {
 
 impl CollectionData {
     // todo(mvid): don't deserialize entire collection
-    pub fn get_members(a: &AccountInfo) -> Vec<Pubkey> {
-        let collection = CollectionData::from_account_info(a)?;
-    }
+    // pub fn get_members(a: &AccountInfo) -> Vec<Pubkey> {
+    //     let collection = CollectionData::from_account_info(a)?;
+    // }
 
     pub fn from_account_info(a: &AccountInfo) -> Result<CollectionData, ProgramError> {
         if (a.data_len() - BASE_COLLECTION_DATA_SIZE) % mem::size_of::<Pubkey>() != 0 {
