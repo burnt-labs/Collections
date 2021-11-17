@@ -2,25 +2,25 @@
 
 **Simple Summary**
 
-An onchain standard surrounding the metadata of collections which eradicates the possibility of NFTs within the collection being replicated and other forms of market manipulation and attacks. In addition, a proposed upgrade to Metaplex token program.
+An onchain standard surrounding the metadata of collections which eradicates the possibility of NFTs within the collection being replicated and other forms of market manipulation and attacks. In addition, a proposed upgrade to the Metaplex token program.
 
 **Abstract**
 
-The NFT marketplace is becoming increasingly vulnerable to attacks after significant growth in 2021. The incentive for malicious actors to create NFT replicas or claim arbitrary NFTs to a given collection is rising. The onchain collection metadata standard detailed in this document addresses the diverse risks that are surfacing as a result of vastly greater values in the NFT marketplace. The onchain collection metadata standard clearly ties specific NFTs to collections and embeds key data onchain regarding the associations of NFT collections, subcollections, and NFTs. It also details an append-only array for the addition of NFTs to given collections, preventing market manipulation through the arbitrary removal of NFTs from collections.
+The NFT marketplace is becoming increasingly vulnerable to attacks after significant growth in 2021. There are larger and larger incentives for malicious actors to create NFT replicas or claim that arbitrary NFTs belong to a given collection. The onchain collection metadata standard detailed in this document addresses the diverse risks that are surfacing as a result of rising asset values in the NFT marketplace. This standard explicitly links specific NFTs to collections and embeds key data onchain regarding the associations of NFT collections, subcollections, and NFTs. It also details an append-only array for the addition of NFTs to given collections, preventing market manipulation through the arbitrary removal of NFTs from collections.
 
 **Motivation**
 
-The market surrounding non-fungible tokens has recorded tremendous growth over 2021. The growth experienced throughout the year has brought unprecedented attention to the space but it has also led to the emergence of various risks. Vastly greater NFT values have raised the incentives for attackers to create replicas of NFT assets or create deceptive NFT collections that claim to hold assets that are not tied to the collection. The possibility to store the metadata for NFTs and NFT collections off-chain has hugely widened the scope for such attacks.
+The market surrounding non-fungible tokens has recorded tremendous growth over 2021. This has brought unprecedented attention to the space, but it has also exposed various risks that exist in its current infrastructure. Vastly greater NFT values have raised the incentives for attackers to create replicas of NFT assets or create deceptive NFT collections that claim to hold assets that are not tied to the collection. The possibility to store the metadata for NFTs and NFT collections off-chain has greatly widened the scope for such attacks.
 
-This document details an onchain metadata standard for Solana-based NFT collections which addresses the diverse risks that have emerged in the NFT marketplace. The metadata standard requires multiple onchain transactions which creates layers of security between authentic NFT assets and collections and those created by fraudulent actors.
+This document details an onchain metadata standard for Solana-based NFT collections which addresses the diverse risks that have emerged in the NFT marketplace. The metadata standard requires multiple onchain transactions, creating layers of security between authentic NFT assets and collections, and those created by fraudulent actors.
 
-The high gas costs associated with the Ethereum network has increased the popularity of offchain metadata storage. The low-cost environment of the Solana chain fosters a much more favorable environment for onchain metadata storage. The risks associated with offchain metadata storage go beyond asset replication. In the case of offchain metadata storage, the value of the asset and it’s longevity in the marketplace depends on the server infrastructure that stores the metadata. If the server infrastructure experiences shutdowns, the authenticity, value, and ownership of the asset can be compromised.
+The high gas costs associated with the Ethereum network have increased the popularity of offchain metadata storage. The low-cost environment of the Solana chain fosters a much more favorable environment for onchain metadata storage. The risks associated with offchain metadata storage go beyond asset replication. In the case of offchain metadata storage, the value of the asset and its longevity in the marketplace depend on the server infrastructure that stores its metadata. If the server infrastructure experiences shutdowns, the authenticity, value, and ownership of the asset can be compromised.
 
-The scope for attack has also increased due to the increasingly multichain environment and marketplace for NFT assets. While the majority of the NFT ecosystem resides on Ethereum, a growing share has been transitioning to other blockchains like Solana. As marketplaces for buying and selling these assets surface on different chains, holders will increasingly transition between chains to access various marketplaces which will change the hash of NFT collections and their respective assets. In the case that the metadata is stored off chain, verifying authenticity and provenance becomes a major challenge after such transitions.
+The scope for attack has also increased due to the increasingly multichain environment and marketplace for NFT assets. While the majority of the NFT ecosystem resides on Ethereum, a growing share has been transitioning to other blockchains like Solana. As marketplaces for buying and selling these assets surface on different chains, holders will increasingly transition between chains to access these marketplaces which will change the hash of NFT collections and their respective assets. In the case that the metadata is stored off chain, verifying authenticity and provenance becomes a major challenge after such transitions.
 
 **Specifications**
 
-The collection metadata standard is an onchain metadata standard which stores essential information about NFTs and their associated collections on the Solana chain. This information can be used to assess the authenticity of collections and their NFTs. Decorator structs are provided to NFTs that are part of a collection. The decorator struct, collection, provides basic information about the collection which the NFT is a part of. The collection struct includes information such as the name of the collection, a description of the collection, and an array of the addresses of tokens of sub-collections which belong to the collection. Collections can belong to other collections (i.e. sub-collections). The struct also links to data which highlights all of the collections which the NFT belongs to.
+The collection metadata standard is an onchain metadata standard which stores essential information about NFTs and their associated collections on the Solana chain. This information can be used to assess the authenticity of collections and their NFTs. Decorator structs are provided to NFTs that are part of a collection. The decorator struct, collection, provides basic information about the collection to which the NFT belongs. The collection struct includes information such as the name of the collection, a description of the collection, and an array of the addresses of tokens for sub-collections that belong to the collection. Collections can belong to other collections (i.e. sub-collections). The struct also links to data which highlights all of the collections to which the NFT belongs.
 
 Creating collections via the metadata standard requires two onchain signatures. One signature broadcasts the collection to the Solana blockchain while the other mints the NFTs or sub-collections to the collection. Further NFTs and sub-collections can be added later. The standard for minting NFTs and sub-collections is append only, meaning that NFTs and sub-collections can only be added to a collection and not removed. NFTs and subcollections are added to the members array within the NFT collections metadata.
 
@@ -50,8 +50,8 @@ Your wallet should be using the following information from the on-chain metadata
 | --- | --- | --- | 
 | name        | string                                   | name of the collection                                                                                  | 
 | description | string                                   | short description of the collection                                                                     |
-| members     | array<address>                           | an array of address of tokens or sub-collections belonging to this collection                           |
-| member_of   | array<[Membership Map](#membership-map)> | array of [Membership Map](#membership-map) displaying the collections the sub-collection is a member of |
+| members     | array<address>                           | an array of addresses for tokens or sub-collections belonging to this collection                           |
+| member_of   | array<[Membership Map](#membership-map)> | an array of [Membership Map](#membership-map) displaying the parent collections to which this collection belongs |
 
 
 ## NFT Token Standard extension
@@ -83,7 +83,7 @@ The NFT Token Standard `Metadata` struct is extended with a key `collection` whi
 ### Adding existing NFTs
 
 * NFTs don't have to be minted by the collection, and can be added later.
-* A collection would append the NFT it is preparing to add to it `members` array.
+* A collection would append the NFT it is preparing to add to its `members` array.
 * After the NFT address has been added to the `members` array, the NFT can call a function on the Collection to receive the verifying signature. The Collection will check for the address in the array before the signature is returned.
 
 ### Concerns / Considerations
