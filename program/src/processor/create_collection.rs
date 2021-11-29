@@ -48,7 +48,6 @@ fn parse_accounts<'a, 'b: 'a>(
         system: next_account_info(account_iter)?,
     };
 
-
     Ok(accounts)
 }
 
