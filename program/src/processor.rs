@@ -6,13 +6,13 @@ use solana_program::{
 };
 use std::mem;
 
-pub mod add_member;
+pub mod add_members;
 pub mod add_member_of;
 pub mod arrange_member;
 pub mod create_collection;
 pub mod remove_member;
 
-pub use add_member::*;
+pub use add_members::*;
 pub use add_member_of::*;
 pub use arrange_member::*;
 pub use create_collection::*;
@@ -28,7 +28,7 @@ pub fn process_instruction(
         CollectionInstruction::CreateCollection(args) => {
             create_collection(program_id, accounts, args)
         }
-        CollectionInstruction::AddMember(args) => add_member(program_id, accounts, args),
+        CollectionInstruction::AddMembers(args) => add_members(program_id, accounts, args),
         CollectionInstruction::RemoveMember(args) => remove_member(program_id, accounts, args),
         CollectionInstruction::ArrangeMember(args) => arrange_member(program_id, accounts, args),
         CollectionInstruction::AddMemberOf(args) => add_member_of(program_id, accounts, args),
