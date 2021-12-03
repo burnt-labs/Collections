@@ -25,13 +25,16 @@ pub fn process_instruction(
 ) -> ProgramResult {
     use crate::instruction::CollectionInstruction;
     match CollectionInstruction::try_from_slice(input)? {
-        CollectionInstruction::CreateCollection(args) => {
-            create_collection(program_id, accounts, args)
-        }
-        CollectionInstruction::AddMembers(args) => add_members(program_id, accounts, args),
-        CollectionInstruction::RemoveMember(args) => remove_member(program_id, accounts, args),
-        CollectionInstruction::ArrangeMember(args) => arrange_member(program_id, accounts, args),
-        CollectionInstruction::AddMemberOf(args) => add_member_of(program_id, accounts, args),
+        CollectionInstruction::CreateCollection(args) =>
+            create_collection(program_id, accounts, args),
+        CollectionInstruction::AddMembers(args) =>
+            add_members(program_id, accounts, args),
+        CollectionInstruction::RemoveMember(args) =>
+            remove_member(program_id, accounts, args),
+        CollectionInstruction::ArrangeMember(args) =>
+            arrange_member(program_id, accounts, args),
+        CollectionInstruction::AddMemberOf(args) =>
+            add_member_of(program_id, accounts, args),
     }
 }
 
@@ -43,7 +46,14 @@ pub struct CollectionSignature {
 }
 
 // todo(mvid): update this when struct finalized
-pub const BASE_COLLECTION_DATA_SIZE: usize = 32 + 32 + 1 + 8;
+pub const BASE_COLLECTION_DATA_SIZE: usize = 32 // name
+    + 32 // description
+    + 1 // removable
+    + 4 // expandable
+    + 1 // arrangeable
+    + 4 // members vec
+    + 4 // member_of vec
+;
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq, Debug)]
@@ -58,11 +68,6 @@ pub struct CollectionData {
 }
 
 impl CollectionData {
-    // todo(mvid): don't deserialize entire collection
-    // pub fn get_members(a: &AccountInfo) -> Vec<Pubkey> {
-    //     let collection = CollectionData::from_account_info(a)?;
-    // }
-
     pub fn from_account_info(a: &AccountInfo) -> Result<CollectionData, ProgramError> {
         if (a.data_len() - BASE_COLLECTION_DATA_SIZE) % mem::size_of::<Pubkey>() != 0 {
             return Err(CollectionError::DataTypeMismatch.into());

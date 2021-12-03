@@ -80,6 +80,10 @@ pub fn create_collection(
         account_size += args.members.len() * mem::size_of::<Pubkey>();
     }
 
+    if args.member_of.len() > 0 {
+        account_size += args.member_of.len() * mem::size_of::<CollectionSignature>()
+    }
+
     create_or_allocate_account_raw(
         *program_id,
         accounts.collection,
