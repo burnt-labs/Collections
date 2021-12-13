@@ -11,12 +11,14 @@ pub mod add_member_of;
 pub mod arrange_member;
 pub mod create_collection;
 pub mod remove_member;
+pub mod freeze;
 
 pub use add_members::*;
 pub use add_member_of::*;
 pub use arrange_member::*;
 pub use create_collection::*;
 pub use remove_member::*;
+pub use freeze::*;
 
 pub fn process_instruction(
     program_id: &Pubkey,

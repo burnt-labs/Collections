@@ -1,0 +1,58 @@
+use crate::{
+    processor::{CollectionData, CollectionError},
+    utils::assert_owned_by,
+};
+
+use {
+    borsh::{BorshDeserialize, BorshSerialize},
+    solana_program::{
+        account_info::{next_account_info, AccountInfo},
+        entrypoint::ProgramResult,
+        msg,
+        program_error::ProgramError,
+        pubkey::Pubkey,
+    },
+};
+
+#[repr(C)]
+#[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
+pub struct FreezeCollectionArgs {}
+
+struct Accounts<'a, 'b: 'a> {
+    collection: &'a AccountInfo<'b>,
+}
+
+fn parse_accounts<'a, 'b: 'a>(
+    program_id: &Pubkey,
+    accounts: &'a [AccountInfo<'b>],
+) -> Result<Accounts<'a, 'b>, ProgramError> {
+    let account_iter = &mut accounts.iter();
+    let accounts = Accounts {
+        collection: next_account_info(account_iter)?,
+    };
+
+    // assert the function is called by the collection owner
+    assert_owned_by(accounts.collection, program_id)?;
+
+    Ok(accounts)
+}
+
+pub fn freeze_collection(
+    program_id: &Pubkey,
+    accounts: &[AccountInfo],
+    args: FreezeCollectionArgs,
+) -> ProgramResult {
+    msg!("+ Processing FreezeCollection");
+    let accounts = parse_accounts(program_id, accounts);
+
+    let mut collection = CollectionData::from_account_info(accounts.collection)?;
+
+    // set all mutation options to false
+    collection.removable = false;
+    collection.arrangeable = false;
+    collection.expandable = 0;
+
+    collection.serialize(&mut *accounts.collection.data.borrow_mut())?;
+
+    Ok(())
+}
