@@ -46,11 +46,15 @@ The concept of the Collection Metadata program is to provide decorator structs t
 
 Your wallet should be using the following information from the on-chain metadata. The [NFT Token Standard extension section](#nft-token-standard-extension) will explain how.
 
-| Field       | Type                                     | Description                                                                                             | 
-| --- | --- | --- | 
-| name        | string                                   | name of the collection                                                                                  | 
-| description | string                                   | short description of the collection                                                                     |
-| members     | array<address>                           | an array of addresses for tokens or sub-collections belonging to this collection                           |
+| Field       | Type                                     | Description                                                                                                      | 
+|-------------|------------------------------------------|------------------------------------------------------------------------------------------------------------------| 
+| name        | string                                   | name of the collection                                                                                           | 
+| description | string                                   | short description of the collection                                                                              |
+| removable   | boolean                                  | a boolean describing if elements of this collection can be removed                                               |
+| expandable  | boolean                                  | a boolean describing if elements can be appended to this collection                                              |
+| arrangeable | boolean                                  | a boolean describing if elements can be rearranged in this collection                                            |
+| max_size    | u32                                      | an unsigned 32 bit int describing the maximum size of the collection asset list, unbounded if 0                  |
+| members     | array<address>                           | an array of addresses for tokens or sub-collections belonging to this collection                                 |
 | member_of   | array<[Membership Map](#membership-map)> | an array of [Membership Map](#membership-map) displaying the parent collections to which this collection belongs |
 
 
@@ -64,10 +68,10 @@ The NFT Token Standard `Metadata` struct is extended with a key `collection` whi
 
 ### Membership Map
 
-| Field     | Type   | Description                                 | Display suggestions                                                                     | 
-| --- | --- | --- | --- | 
-| address   | string | collection address                          | single NFT view, links to collection and resolved collection name                       |
-| signature | string | a hash of the NFT, signed by the collection | single NFT view, resolves with collection public key and verifies validity of signature |
+| Field     | Type   | Description                                         | Display suggestions                                                                     | 
+| --- | --- |-----------------------------------------------------| --- | 
+| address   | string | collection address                                  | single NFT view, links to collection and resolved collection name                       |
+| signature | string | a hash of the NFT address, signed by the collection | single NFT view, resolves with collection public key and verifies validity of signature |
 
 ## Ownership
 
