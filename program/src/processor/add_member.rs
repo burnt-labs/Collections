@@ -50,9 +50,9 @@ pub fn add_member(
     // assert the collection can add members
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
-    if collection.expandable == 0 {
+    if collection.expandable == false {
         return Err(CollectionError::NotExpandable.into());
-    } else if collection.expandable as usize == collection.members.len() {
+    } else if collection.max_size as usize == collection.members.len() {
         return Err(CollectionError::CapacityExceeded.into());
     }
 

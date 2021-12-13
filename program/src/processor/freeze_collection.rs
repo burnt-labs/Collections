@@ -50,7 +50,7 @@ pub fn freeze_collection(
     // set all mutation options to false
     collection.removable = false;
     collection.arrangeable = false;
-    collection.expandable = 0;
+    collection.expandable = false;
 
     collection.serialize(&mut *accounts.collection.data.borrow_mut())?;
 
