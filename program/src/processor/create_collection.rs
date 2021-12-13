@@ -18,11 +18,13 @@ pub struct CreateCollectionArgs {
     pub description: [u8; 32],
     // A boolean as to whether assets can be removed from the `members` list
     pub removable: bool,
-    // A u32 that declares what the maximum number of member assets on the chain can be.
-    // If set to 0, the collection must have all members defined at start.
-    pub expandable: u32,
+    // A bool that decides if assets can be appended to the collection
+    pub expandable: bool,
     // A boolean as to whether asset order can be changed
     pub arrangeable: bool,
+    // A u32 that declares what the maximum number of member assets on the chain can be.
+    // If set to 0, the collection has no max size.
+    pub max_size: u32,
     // A list of public keys that this collection considers to be members
     pub members: Vec<Pubkey>,
     // A list of signature that this collection is a member of
@@ -67,13 +69,13 @@ pub fn create_collection(
     }
 
     let mut account_size = BASE_COLLECTION_DATA_SIZE;
-    if args.expandable > 0 {
-        if args.members.len() > args.expandable as usize {
+    if args.max_size > 0 {
+        if args.members.len() > args.max_size as usize {
             return Err(CollectionError::CapacityExceeded.into());
         }
 
-        account_size += args.expandable as usize * mem::size_of::<Pubkey>();
-    } else {
+        account_size += args.max_size as usize * mem::size_of::<Pubkey>();
+    } else if args.expandable == false {
         if args.members.len() == 0 {
             return Err(CollectionError::PermanentlyEmptyCollection.into());
         }
@@ -100,6 +102,7 @@ pub fn create_collection(
         removable: args.removable,
         expandable: args.expandable,
         arrangeable: args.arrangeable,
+        max_size: args.max_size,
         members: args.members.clone(),
         member_of: args.member_of.clone(),
     }

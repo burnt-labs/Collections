@@ -18,7 +18,7 @@ pub use add_member_of::*;
 pub use arrange_member::*;
 pub use create_collection::*;
 pub use remove_member::*;
-pub use freeze::*;
+pub use freeze_collection::*;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -37,6 +37,8 @@ pub fn process_instruction(
             arrange_member(program_id, accounts, args),
         CollectionInstruction::AddMemberOf(args) =>
             add_member_of(program_id, accounts, args),
+        CollectionInstruction::FreezeCollection(args) =>
+            freeze_collection(program_id, accounts, args),
     }
 }
 
@@ -51,8 +53,9 @@ pub struct CollectionSignature {
 pub const BASE_COLLECTION_DATA_SIZE: usize = 32 // name
     + 32 // description
     + 1 // removable
-    + 4 // expandable
+    + 1 // expandable
     + 1 // arrangeable
+    + 4 // max_size
     + 4 // members vec
     + 4 // member_of vec
 ;
@@ -63,8 +66,9 @@ pub struct CollectionData {
     pub name: [u8; 32],
     pub description: [u8; 32],
     pub removable: bool,
-    pub expandable: u32,
+    pub expandable: bool,
     pub arrangeable: bool,
+    pub max_size: u32,
     pub members: Vec<Pubkey>,
     pub member_of: Vec<CollectionSignature>,
 }
