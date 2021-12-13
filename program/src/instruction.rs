@@ -2,8 +2,8 @@ use borsh::{BorshDeserialize, BorshSerialize};
 
 use crate::processor::add_member_of::AddMemberOfArgs;
 use crate::processor::arrange_member::ArrangeMemberArgs;
-use crate::processor::remove_member::RemoveMemberArgs;
 use crate::processor::freeze_collection::FreezeCollectionArgs;
+use crate::processor::remove_member::RemoveMemberArgs;
 use crate::processor::{add_members::AddMembersArgs, create_collection::CreateCollectionArgs};
 
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]

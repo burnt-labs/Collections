@@ -1,7 +1,4 @@
-use crate::{
-    processor::{CollectionData, CollectionError},
-    utils::assert_owned_by,
-};
+use crate::{processor::CollectionData, utils::assert_owned_by};
 
 use {
     borsh::{BorshDeserialize, BorshSerialize},
@@ -40,10 +37,10 @@ fn parse_accounts<'a, 'b: 'a>(
 pub fn freeze_collection(
     program_id: &Pubkey,
     accounts: &[AccountInfo],
-    args: FreezeCollectionArgs,
+    _: FreezeCollectionArgs,
 ) -> ProgramResult {
     msg!("+ Processing FreezeCollection");
-    let accounts = parse_accounts(program_id, accounts);
+    let accounts = parse_accounts(program_id, accounts)?;
 
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 

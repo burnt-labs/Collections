@@ -6,19 +6,19 @@ use solana_program::{
 };
 use std::mem;
 
-pub mod add_members;
 pub mod add_member_of;
+pub mod add_members;
 pub mod arrange_member;
 pub mod create_collection;
+pub mod freeze_collection;
 pub mod remove_member;
-pub mod freeze;
 
-pub use add_members::*;
 pub use add_member_of::*;
+pub use add_members::*;
 pub use arrange_member::*;
 pub use create_collection::*;
-pub use remove_member::*;
 pub use freeze_collection::*;
+pub use remove_member::*;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -27,18 +27,16 @@ pub fn process_instruction(
 ) -> ProgramResult {
     use crate::instruction::CollectionInstruction;
     match CollectionInstruction::try_from_slice(input)? {
-        CollectionInstruction::CreateCollection(args) =>
-            create_collection(program_id, accounts, args),
-        CollectionInstruction::AddMembers(args) =>
-            add_members(program_id, accounts, args),
-        CollectionInstruction::RemoveMember(args) =>
-            remove_member(program_id, accounts, args),
-        CollectionInstruction::ArrangeMember(args) =>
-            arrange_member(program_id, accounts, args),
-        CollectionInstruction::AddMemberOf(args) =>
-            add_member_of(program_id, accounts, args),
-        CollectionInstruction::FreezeCollection(args) =>
-            freeze_collection(program_id, accounts, args),
+        CollectionInstruction::CreateCollection(args) => {
+            create_collection(program_id, accounts, args)
+        }
+        CollectionInstruction::AddMembers(args) => add_members(program_id, accounts, args),
+        CollectionInstruction::RemoveMember(args) => remove_member(program_id, accounts, args),
+        CollectionInstruction::ArrangeMember(args) => arrange_member(program_id, accounts, args),
+        CollectionInstruction::AddMemberOf(args) => add_member_of(program_id, accounts, args),
+        CollectionInstruction::FreezeCollection(args) => {
+            freeze_collection(program_id, accounts, args)
+        }
     }
 }
 
