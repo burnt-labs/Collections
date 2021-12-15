@@ -45,9 +45,7 @@ pub fn freeze_collection(
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
     // set all mutation options to false
-    collection.removable = false;
-    collection.arrangeable = false;
-    collection.expandable = false;
+    collection.advanced = 0;
 
     collection.serialize(&mut *accounts.collection.data.borrow_mut())?;
 

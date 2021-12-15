@@ -1,4 +1,5 @@
 use crate::errors::CollectionError;
+use bitflags::bitflags;
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::AccountInfo, borsh::try_from_slice_unchecked, entrypoint::ProgramResult,
@@ -6,6 +7,7 @@ use solana_program::{
 };
 use std::mem;
 
+pub mod add_member;
 pub mod add_member_of;
 pub mod add_members;
 pub mod arrange_member;
@@ -13,6 +15,7 @@ pub mod create_collection;
 pub mod freeze_collection;
 pub mod remove_member;
 
+pub use add_member::*;
 pub use add_member_of::*;
 pub use add_members::*;
 pub use arrange_member::*;
@@ -49,23 +52,27 @@ pub struct CollectionSignature {
 
 // todo(mvid): update this when struct finalized
 pub const BASE_COLLECTION_DATA_SIZE: usize = 32 // name
-    + 32 // description
-    + 1 // removable
-    + 1 // expandable
-    + 1 // arrangeable
+    + 256 // description
+    + 1 // advanced
     + 4 // max_size
     + 4 // members vec
     + 4 // member_of vec
 ;
 
+bitflags! {
+    pub struct AdvancedOptions: u8 {
+        const REMOVABLE   = 0b00000001;
+        const EXPANDABLE  = 0b00000010;
+        const ARRANGEABLE = 0b00000100;
+    }
+}
+
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq, Debug)]
 pub struct CollectionData {
     pub name: [u8; 32],
-    pub description: [u8; 32],
-    pub removable: bool,
-    pub expandable: bool,
-    pub arrangeable: bool,
+    pub description: [u8; 256],
+    pub advanced: u8,
     pub max_size: u32,
     pub members: Vec<Pubkey>,
     pub member_of: Vec<CollectionSignature>,

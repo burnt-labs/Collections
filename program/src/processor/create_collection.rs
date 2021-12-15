@@ -1,4 +1,6 @@
-use crate::processor::{CollectionData, CollectionSignature, BASE_COLLECTION_DATA_SIZE};
+use crate::processor::{
+    AdvancedOptions, CollectionData, CollectionSignature, BASE_COLLECTION_DATA_SIZE,
+};
 use crate::{errors::CollectionError, utils::create_or_allocate_account_raw, PREFIX};
 use {
     borsh::{BorshDeserialize, BorshSerialize},
@@ -15,13 +17,12 @@ pub struct CreateCollectionArgs {
     // The name of the Collection
     pub name: [u8; 32],
     // A short description of the Collection
-    pub description: [u8; 32],
-    // A boolean as to whether assets can be removed from the `members` list
-    pub removable: bool,
-    // A bool that decides if assets can be appended to the collection
-    pub expandable: bool,
-    // A boolean as to whether asset order can be changed
-    pub arrangeable: bool,
+    pub description: [u8; 256],
+    // A u8 storing boolean values for advanced options removable, expandable, arrangeable
+    // removable >> 1: whether assets can be removed from the `members` list
+    // expandable >> 2: if assets can be appended to the collection
+    // arrangeable >> 3: whether asset order can be changed
+    pub advanced: u8,
     // A u32 that declares what the maximum number of member assets on the chain can be.
     // If set to 0, the collection has no max size.
     pub max_size: u32,
@@ -66,7 +67,7 @@ pub fn create_collection(
     let collection_path = [
         PREFIX.as_bytes(),
         program_id.as_ref(),
-        accounts.mint.key.as_ref()
+        accounts.mint.key.as_ref(),
     ];
 
     let (collection_key, bump) = Pubkey::find_program_address(&collection_path, program_id);
@@ -74,6 +75,7 @@ pub fn create_collection(
         return Err(CollectionError::InvalidCollectionAccount.into());
     }
 
+    let options = AdvancedOptions::from_bits(args.advanced).unwrap();
     let mut account_size = BASE_COLLECTION_DATA_SIZE;
     if args.max_size > 0 {
         if args.members.len() > args.max_size as usize {
@@ -81,7 +83,7 @@ pub fn create_collection(
         }
 
         account_size += args.max_size as usize * mem::size_of::<Pubkey>();
-    } else if args.expandable == false {
+    } else if (options & AdvancedOptions::EXPANDABLE) == AdvancedOptions::EXPANDABLE {
         if args.members.len() == 0 {
             return Err(CollectionError::PermanentlyEmptyCollection.into());
         }
@@ -105,9 +107,7 @@ pub fn create_collection(
     CollectionData {
         name: args.name,
         description: args.description,
-        removable: args.removable,
-        expandable: args.expandable,
-        arrangeable: args.arrangeable,
+        advanced: args.advanced,
         max_size: args.max_size,
         members: args.members.clone(),
         member_of: args.member_of.clone(),

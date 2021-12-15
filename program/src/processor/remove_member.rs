@@ -53,7 +53,7 @@ pub fn remove_member(
     // assert the collection can remove members
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
-    if !collection.removable {
+    if !collection.advanced.to_le_bytes()[0] == 1 {
         return Err(CollectionError::NotRemovable.into());
     } else {
         // assert the member asset at the index is the correct asset

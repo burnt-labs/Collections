@@ -10,7 +10,7 @@ use {
 };
 
 use crate::{
-    processor::{CollectionData, CollectionError},
+    processor::{AdvancedOptions, CollectionData, CollectionError},
     utils::assert_owned_by,
 };
 
@@ -58,7 +58,8 @@ pub fn arrange_member(
     // assert the collection can add members
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
 
-    if !collection.arrangeable {
+    let options = AdvancedOptions::from_bits(collection.advanced).unwrap();
+    if (options & AdvancedOptions::ARRANGEABLE) != AdvancedOptions::ARRANGEABLE {
         return Err(CollectionError::NotArrangeable.into());
     } else if args.old_index >= collection.members.len() {
         return Err(CollectionError::InvalidOriginalArrangeIndex.into());

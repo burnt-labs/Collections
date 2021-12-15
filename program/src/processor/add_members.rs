@@ -9,7 +9,7 @@ use {
 };
 
 use crate::{
-    processor::{CollectionData, CollectionError},
+    processor::{AdvancedOptions, CollectionData, CollectionError},
     utils::assert_owned_by,
 };
 
@@ -38,7 +38,8 @@ pub fn add_members(
     // assert the collection can add members
     let mut collection = CollectionData::from_account_info(collection_account)?;
 
-    if collection.expandable == false {
+    let options = AdvancedOptions::from_bits(collection.advanced).unwrap();
+    if (options & AdvancedOptions::EXPANDABLE) != AdvancedOptions::EXPANDABLE {
         return Err(CollectionError::NotExpandable.into());
     }
 
