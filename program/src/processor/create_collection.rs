@@ -33,6 +33,7 @@ pub struct CreateCollectionArgs {
 
 struct Accounts<'a, 'b: 'a> {
     collection: &'a AccountInfo<'b>,
+    mint: &'a AccountInfo<'b>,
     payer: &'a AccountInfo<'b>,
     rent: &'a AccountInfo<'b>,
     system: &'a AccountInfo<'b>,
@@ -45,6 +46,7 @@ fn parse_accounts<'a, 'b: 'a>(
     let account_iter = &mut accounts.iter();
     let accounts = Accounts {
         collection: next_account_info(account_iter)?,
+        mint: next_account_info(account_iter)?,
         payer: next_account_info(account_iter)?,
         rent: next_account_info(account_iter)?,
         system: next_account_info(account_iter)?,
@@ -61,7 +63,11 @@ pub fn create_collection(
     msg!("+ Processing CreateCollection");
     let accounts = parse_accounts(program_id, accounts)?;
 
-    let collection_path = [PREFIX.as_bytes(), program_id.as_ref()];
+    let collection_path = [
+        PREFIX.as_bytes(),
+        program_id.as_ref(),
+        accounts.mint.key.as_ref()
+    ];
 
     let (collection_key, bump) = Pubkey::find_program_address(&collection_path, program_id);
     if collection_key != *accounts.collection.key {
