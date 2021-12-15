@@ -15,9 +15,11 @@ use {
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
 pub struct CreateCollectionArgs {
     // The name of the Collection
-    pub name: [u8; 32],
+    pub name: String,
     // A short description of the Collection
-    pub description: [u8; 256],
+    pub description: String,
+    // A url for the collection to display
+    pub image: String,
     // A u8 storing boolean values for advanced options removable, expandable, arrangeable
     // removable >> 1: whether assets can be removed from the `members` list
     // expandable >> 2: if assets can be appended to the collection
@@ -107,6 +109,7 @@ pub fn create_collection(
     CollectionData {
         name: args.name,
         description: args.description,
+        image: args.image,
         advanced: args.advanced,
         max_size: args.max_size,
         members: args.members.clone(),

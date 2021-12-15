@@ -50,9 +50,12 @@ pub struct CollectionSignature {
     signature: [u8; 32],
 }
 
+pub const MAX_NAME_LENGTH: usize = 64;
+pub const MAX_DESCRIPTION_LENGTH: usize = 512;
+pub const MAX_IMAGE_LENGTH: usize = 2048;
+
 // todo(mvid): update this when struct finalized
-pub const BASE_COLLECTION_DATA_SIZE: usize = 32 // name
-    + 256 // description
+pub const BASE_COLLECTION_DATA_SIZE: usize = MAX_NAME_LENGTH // name
     + 1 // advanced
     + 4 // max_size
     + 4 // members vec
@@ -70,8 +73,9 @@ bitflags! {
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq, Debug)]
 pub struct CollectionData {
-    pub name: [u8; 32],
-    pub description: [u8; 256],
+    pub name: String,
+    pub description: String,
+    pub image: String,
     pub advanced: u8,
     pub max_size: u32,
     pub members: Vec<Pubkey>,
