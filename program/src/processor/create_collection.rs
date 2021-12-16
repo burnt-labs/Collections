@@ -107,7 +107,13 @@ pub fn create_collection(
         accounts.system,
         accounts.payer,
         account_size,
-        &[PREFIX.as_bytes(), program_id.as_ref(), &[bump]],
+        &[
+            PREFIX.as_bytes(),
+            program_id.as_ref(),
+            accounts.creator.key.as_ref(),
+            args.name.as_bytes(),
+            &[bump],
+        ],
     )?;
 
     let authorities: Vec<Pubkey> = Vec::from([accounts.creator.key.clone()]);
