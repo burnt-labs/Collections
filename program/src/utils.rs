@@ -31,7 +31,7 @@ pub fn assert_authority(account: &AccountInfo, authorities: Vec<Pubkey>) -> Prog
             "{} Authority Invalid",
             account.key,
         );
-        Err(CollectionError::InvalidAuthority.into())
+        return Err(CollectionError::InvalidAuthority.into());
     }
 
     if !account.is_signer {
@@ -39,9 +39,9 @@ pub fn assert_authority(account: &AccountInfo, authorities: Vec<Pubkey>) -> Prog
             "{} Authority is not a signer",
             account.key,
         );
-        Err(CollectionError::AuthorityIsNotSigner.into())
+        return Err(CollectionError::AuthorityIsNotSigner.into());
     }
-    
+
     Ok(())
 }
 
