@@ -25,12 +25,7 @@ pub struct CreateCollectionArgs {
     // expandable >> 2: if assets can be appended to the collection
     // arrangeable >> 3: whether asset order can be changed
     pub advanced: u8,
-    // The original creator of the collection, used as a key seed
-    pub creator: Pubkey,
     // The current authorities of the collection, who can make changes
-    pub authorities: Vec<Pubkey>,
-    // A u32 that declares what the maximum number of member assets on the chain can be.
-    // If set to 0, the collection has no max size.
     pub max_size: u32,
     // A list of public keys that this collection considers to be members
     pub members: Vec<Pubkey>,
@@ -58,6 +53,10 @@ fn parse_accounts<'a, 'b: 'a>(
         rent: next_account_info(account_iter)?,
         system: next_account_info(account_iter)?,
     };
+
+    if accounts.creator.is_signer {
+        return Err(CollectionError::CreatorIsNotSigner.into());
+    }
 
     Ok(accounts)
 }

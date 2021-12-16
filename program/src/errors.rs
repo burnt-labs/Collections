@@ -52,6 +52,9 @@ pub enum CollectionError {
 
     #[error("Authority is not a signer")]
     AuthorityIsNotSigner,
+
+    #[error("Creator is not signer")]
+    CreatorIsNotSigner,
 }
 
 impl PrintProgramError for CollectionError {
