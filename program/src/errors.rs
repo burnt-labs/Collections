@@ -46,6 +46,9 @@ pub enum CollectionError {
 
     #[error("Invalid authority")]
     InvalidAuthority,
+
+    #[error("Authority not found")]
+    AuthorityNotFound,
 }
 
 impl PrintProgramError for CollectionError {

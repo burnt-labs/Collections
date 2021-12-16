@@ -14,6 +14,8 @@ pub mod arrange_member;
 pub mod create_collection;
 pub mod freeze_collection;
 pub mod remove_member;
+pub mod add_authority;
+pub mod remove_authority;
 
 pub use add_member::*;
 pub use add_member_of::*;
@@ -22,6 +24,8 @@ pub use arrange_member::*;
 pub use create_collection::*;
 pub use freeze_collection::*;
 pub use remove_member::*;
+pub use add_authority::*;
+pub use remove_authority::*;
 
 pub fn process_instruction(
     program_id: &Pubkey,
@@ -39,7 +43,9 @@ pub fn process_instruction(
         CollectionInstruction::AddMemberOf(args) => add_member_of(program_id, accounts, args),
         CollectionInstruction::FreezeCollection(args) => {
             freeze_collection(program_id, accounts, args)
-        }
+        },
+        CollectionInstruction::AddAuthority(args) => add_authority(program_id, accounts, args),
+        CollectionInstruction::RemoveAuthority(args) => remove_authority(program_id, accounts, args),
     }
 }
 
