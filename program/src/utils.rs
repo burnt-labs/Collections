@@ -32,9 +32,17 @@ pub fn assert_authority(account: &AccountInfo, authorities: Vec<Pubkey>) -> Prog
             account.key,
         );
         Err(CollectionError::InvalidAuthority.into())
-    } else {
-        Ok(())
     }
+
+    if !account.is_signer {
+        msg!(
+            "{} Authority is not a signer",
+            account.key,
+        );
+        Err(CollectionError::AuthorityIsNotSigner.into())
+    }
+    
+    Ok(())
 }
 
 #[inline(always)]

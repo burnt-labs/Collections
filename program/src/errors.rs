@@ -49,6 +49,9 @@ pub enum CollectionError {
 
     #[error("Authority not found")]
     AuthorityNotFound,
+
+    #[error("Authority is not a signer")]
+    AuthorityIsNotSigner,
 }
 
 impl PrintProgramError for CollectionError {
