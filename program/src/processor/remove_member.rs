@@ -13,6 +13,7 @@ use {
         pubkey::Pubkey,
     },
 };
+use crate::utils::assert_authority;
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
@@ -23,6 +24,7 @@ pub struct RemoveMemberArgs {
 
 struct Accounts<'a, 'b: 'a> {
     collection: &'a AccountInfo<'b>,
+    authority: &'a AccountInfo<'b>,
     removed_member: &'a AccountInfo<'b>,
 }
 
@@ -33,6 +35,7 @@ fn parse_accounts<'a, 'b: 'a>(
     let account_iter = &mut accounts.iter();
     let accounts = Accounts {
         collection: next_account_info(account_iter)?,
+        authority: next_account_info(account_iter)?,
         removed_member: next_account_info(account_iter)?,
     };
 
@@ -52,6 +55,7 @@ pub fn remove_member(
 
     // assert the collection can remove members
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
+    assert_authority(accounts.authority, collection.authorities.clone())?;
 
     if !collection.advanced.to_le_bytes()[0] == 1 {
         return Err(CollectionError::NotRemovable.into());

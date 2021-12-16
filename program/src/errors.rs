@@ -43,6 +43,9 @@ pub enum CollectionError {
 
     #[error("Invalid new arrange index")]
     InvalidNewArrangeIndex,
+
+    #[error("Invalid authority")]
+    InvalidAuthority,
 }
 
 impl PrintProgramError for CollectionError {

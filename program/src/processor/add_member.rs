@@ -13,6 +13,7 @@ use crate::{
     processor::{AdvancedOptions, CollectionData, CollectionError},
     utils::assert_owned_by,
 };
+use crate::utils::assert_authority;
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
@@ -20,6 +21,7 @@ pub struct AddMemberArgs {}
 
 struct Accounts<'a, 'b: 'a> {
     collection: &'a AccountInfo<'b>,
+    authority: &'a AccountInfo<'b>,
     new_member: &'a AccountInfo<'b>,
 }
 
@@ -30,6 +32,7 @@ fn parse_accounts<'a, 'b: 'a>(
     let account_iter = &mut accounts.iter();
     let accounts = Accounts {
         collection: next_account_info(account_iter)?,
+        authority: next_account_info(account_iter)?,
         new_member: next_account_info(account_iter)?,
     };
 
@@ -49,6 +52,7 @@ pub fn add_member(
 
     // assert the collection can add members
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
+    assert_authority(accounts.authority, collection.authorities.clone())?;
 
     let options = AdvancedOptions::from_bits(collection.advanced).unwrap();
     if (options & AdvancedOptions::EXPANDABLE) != AdvancedOptions::EXPANDABLE {

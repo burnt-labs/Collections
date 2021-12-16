@@ -25,6 +25,18 @@ pub fn assert_owned_by(account: &AccountInfo, owner: &Pubkey) -> ProgramResult {
     }
 }
 
+pub fn assert_authority(account: &AccountInfo, authorities: Vec<Pubkey>) -> ProgramResult {
+    if !authorities.contains(account.key ) {
+        msg!(
+            "{} Authority Invalid",
+            account.key,
+        );
+        Err(CollectionError::InvalidAuthority.into())
+    } else {
+        Ok(())
+    }
+}
+
 #[inline(always)]
 pub fn create_or_allocate_account_raw<'a>(
     program_id: Pubkey,

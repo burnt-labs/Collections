@@ -12,6 +12,7 @@ use crate::{
     processor::{AdvancedOptions, CollectionData, CollectionError},
     utils::assert_owned_by,
 };
+use crate::utils::assert_authority;
 
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
@@ -29,6 +30,8 @@ pub fn add_members(
     let collection_account = next_account_info(account_iter)?;
     assert_owned_by(collection_account, program_id)?;
 
+    let auth_account = next_account_info(account_iter)?;
+
     // iterate through remaining accounts for their pubkeys
     let mut new_members: Vec<Pubkey> = Vec::with_capacity(accounts.len() - 1);
     while let Ok(member) = next_account_info(account_iter) {
@@ -37,6 +40,7 @@ pub fn add_members(
 
     // assert the collection can add members
     let mut collection = CollectionData::from_account_info(collection_account)?;
+    assert_authority(auth_account, collection.authorities.clone())?;
 
     let options = AdvancedOptions::from_bits(collection.advanced).unwrap();
     if (options & AdvancedOptions::EXPANDABLE) != AdvancedOptions::EXPANDABLE {

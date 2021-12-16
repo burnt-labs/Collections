@@ -55,7 +55,9 @@ pub const MAX_DESCRIPTION_LENGTH: usize = 512;
 pub const MAX_IMAGE_LENGTH: usize = 2048;
 
 // todo(mvid): update this when struct finalized
-pub const BASE_COLLECTION_DATA_SIZE: usize = MAX_NAME_LENGTH // name
+pub const BASE_COLLECTION_DATA_SIZE: usize = 1 // name
+    + 32 // creator
+    + 4 // owners vec
     + 1 // advanced
     + 4 // max_size
     + 4 // members vec
@@ -76,6 +78,8 @@ pub struct CollectionData {
     pub name: String,
     pub description: String,
     pub image: String,
+    pub creator: Pubkey,
+    pub authorities: Vec<Pubkey>,
     pub advanced: u8,
     pub max_size: u32,
     pub members: Vec<Pubkey>,

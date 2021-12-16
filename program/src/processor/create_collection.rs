@@ -25,6 +25,10 @@ pub struct CreateCollectionArgs {
     // expandable >> 2: if assets can be appended to the collection
     // arrangeable >> 3: whether asset order can be changed
     pub advanced: u8,
+    // The original creator of the collection, used as a key seed
+    pub creator: Pubkey,
+    // The current authorities of the collection, who can make changes
+    pub authorities: Vec<Pubkey>,
     // A u32 that declares what the maximum number of member assets on the chain can be.
     // If set to 0, the collection has no max size.
     pub max_size: u32,
@@ -36,6 +40,7 @@ pub struct CreateCollectionArgs {
 
 struct Accounts<'a, 'b: 'a> {
     collection: &'a AccountInfo<'b>,
+    creator: &'a AccountInfo<'b>,
     mint: &'a AccountInfo<'b>,
     payer: &'a AccountInfo<'b>,
     rent: &'a AccountInfo<'b>,
@@ -49,6 +54,7 @@ fn parse_accounts<'a, 'b: 'a>(
     let account_iter = &mut accounts.iter();
     let accounts = Accounts {
         collection: next_account_info(account_iter)?,
+        creator: next_account_info(account_iter)?,
         mint: next_account_info(account_iter)?,
         payer: next_account_info(account_iter)?,
         rent: next_account_info(account_iter)?,
@@ -106,10 +112,13 @@ pub fn create_collection(
         &[PREFIX.as_bytes(), program_id.as_ref(), &[bump]],
     )?;
 
+    let authorities: Vec<Pubkey> = Vec::from([accounts.creator.key.clone()]);
     CollectionData {
         name: args.name,
         description: args.description,
         image: args.image,
+        creator: accounts.creator.key.clone(),
+        authorities,
         advanced: args.advanced,
         max_size: args.max_size,
         members: args.members.clone(),

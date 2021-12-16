@@ -1,4 +1,4 @@
-use crate::{processor::CollectionData, utils::assert_owned_by};
+use crate::{processor::CollectionData, utils::{assert_owned_by, assert_authority}};
 
 use {
     borsh::{BorshDeserialize, BorshSerialize},
@@ -17,6 +17,7 @@ pub struct FreezeCollectionArgs {}
 
 struct Accounts<'a, 'b: 'a> {
     collection: &'a AccountInfo<'b>,
+    authority: &'a AccountInfo<'b>,
 }
 
 fn parse_accounts<'a, 'b: 'a>(
@@ -26,6 +27,7 @@ fn parse_accounts<'a, 'b: 'a>(
     let account_iter = &mut accounts.iter();
     let accounts = Accounts {
         collection: next_account_info(account_iter)?,
+        authority: next_account_info(account_iter)?,
     };
 
     // assert the function is called by the collection owner
@@ -43,6 +45,7 @@ pub fn freeze_collection(
     let accounts = parse_accounts(program_id, accounts)?;
 
     let mut collection = CollectionData::from_account_info(accounts.collection)?;
+    assert_authority(accounts.authority, collection.authorities.clone())?;
 
     // set all mutation options to false
     collection.advanced = 0;
