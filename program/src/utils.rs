@@ -73,17 +73,19 @@ pub fn create_or_allocate_account_raw<'a>(
         )?;
     }
 
+    let accounts = &[new_account_info.clone(), system_program_info.clone()];
+
     msg!("Allocate space for the account");
     invoke_signed(
         &system_instruction::allocate(new_account_info.key, size.try_into().unwrap()),
-        &[new_account_info.clone(), system_program_info.clone()],
+        accounts,
         &[&signer_seeds],
     )?;
 
     msg!("Assign the account to the owning program");
     invoke_signed(
         &system_instruction::assign(new_account_info.key, &program_id),
-        &[new_account_info.clone(), system_program_info.clone()],
+        accounts,
         &[&signer_seeds],
     )?;
     msg!("Completed assignment!");
