@@ -53,6 +53,9 @@ pub enum CollectionError {
     #[error("Authority is not a signer")]
     AuthorityIsNotSigner,
 
+    #[error("Collection must have an authority")]
+    CollectionMustHaveAuthority,
+
     #[error("Creator is not signer")]
     CreatorIsNotSigner,
 }

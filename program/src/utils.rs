@@ -86,7 +86,7 @@ pub fn create_or_allocate_account_raw<'a>(
         &[new_account_info.clone(), system_program_info.clone()],
         &[&signer_seeds],
     )?;
-    msg!("Completed assignation!");
+    msg!("Completed assignment!");
 
     Ok(())
 }

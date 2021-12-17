@@ -53,6 +53,10 @@ pub fn remove_authority(
         return Err(CollectionError::AuthorityNotFound.into());
     }
 
+    if collection.authorities.len() == 1 {
+        return Err(CollectionError::CollectionMustHaveAuthority.into())
+    }
+
     let authority_index = collection.authorities.iter().position(|x| x == accounts.removed_authority.key).unwrap();
     collection.authorities.swap_remove(authority_index);
     collection.serialize(&mut *accounts.collection.data.borrow_mut())?;

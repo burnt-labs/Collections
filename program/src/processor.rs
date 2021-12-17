@@ -63,7 +63,8 @@ pub const MAX_IMAGE_LENGTH: usize = 2048;
 // todo(mvid): update this when struct finalized
 pub const BASE_COLLECTION_DATA_SIZE: usize = 1 // name
     + 32 // creator
-    + 4 // owners vec
+    + 4 // authorities vec
+    + 32 // initial authority
     + 1 // advanced
     + 4 // max_size
     + 4 // members vec
