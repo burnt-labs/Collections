@@ -1,5 +1,6 @@
+use std::mem;
 use crate::processor::{
-    AdvancedOptions, CollectionData, CollectionSignature, BASE_COLLECTION_DATA_SIZE,
+    AdvancedOptions, CollectionData, CollectionSignature,
 };
 use crate::{errors::CollectionError, utils::create_or_allocate_account_raw, PREFIX};
 use {
@@ -8,7 +9,6 @@ use {
         account_info::next_account_info, account_info::AccountInfo, entrypoint::ProgramResult, msg,
         program_error::ProgramError, pubkey::Pubkey,
     },
-    std::mem,
 };
 
 #[repr(C)]
@@ -31,6 +31,8 @@ pub struct CreateCollectionArgs {
     pub members: Vec<Pubkey>,
     // A list of signature that this collection is a member of
     pub member_of: Vec<CollectionSignature>,
+    // A string allowing the collection to store arbitrary metadata
+    pub metadata: String,
 }
 
 struct Accounts<'a, 'b: 'a> {
@@ -82,23 +84,30 @@ pub fn create_collection(
     }
 
     let options = AdvancedOptions::from_bits(args.advanced).unwrap();
-    let mut account_size = BASE_COLLECTION_DATA_SIZE;
     if args.max_size > 0 {
         if args.members.len() > args.max_size as usize {
             return Err(CollectionError::CapacityExceeded.into());
         }
 
-        account_size += args.max_size as usize * mem::size_of::<Pubkey>();
     } else if (options & AdvancedOptions::EXPANDABLE) == AdvancedOptions::EXPANDABLE {
         if args.members.len() == 0 {
             return Err(CollectionError::PermanentlyEmptyCollection.into());
         }
-        account_size += args.members.len() * mem::size_of::<Pubkey>();
     }
 
-    if args.member_of.len() > 0 {
-        account_size += args.member_of.len() * mem::size_of::<CollectionSignature>()
-    }
+    let authorities: Vec<Pubkey> = Vec::from([accounts.creator.key.clone()]);
+    let collection_data = CollectionData {
+        name: args.name.clone(),
+        description: args.description,
+        image: args.image,
+        creator: accounts.creator.key.clone(),
+        authorities,
+        advanced: args.advanced,
+        max_size: args.max_size,
+        members: args.members.clone(),
+        member_of: args.member_of.clone(),
+        metadata: args.metadata,
+    };
 
     create_or_allocate_account_raw(
         *program_id,
@@ -106,7 +115,7 @@ pub fn create_collection(
         accounts.rent,
         accounts.system,
         accounts.payer,
-        account_size,
+        mem::size_of_val::<CollectionData>(&collection_data),
         &[
             PREFIX.as_bytes(),
             program_id.as_ref(),
@@ -116,19 +125,7 @@ pub fn create_collection(
         ],
     )?;
 
-    let authorities: Vec<Pubkey> = Vec::from([accounts.creator.key.clone()]);
-    CollectionData {
-        name: args.name,
-        description: args.description,
-        image: args.image,
-        creator: accounts.creator.key.clone(),
-        authorities,
-        advanced: args.advanced,
-        max_size: args.max_size,
-        members: args.members.clone(),
-        member_of: args.member_of.clone(),
-    }
-    .serialize(&mut *accounts.collection.data.borrow_mut())?;
+    collection_data.serialize(&mut *accounts.collection.data.borrow_mut())?;
 
     Ok(())
 }

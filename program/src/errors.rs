@@ -74,6 +74,6 @@ impl From<CollectionError> for ProgramError {
 
 impl<T> DecodeError<T> for CollectionError {
     fn type_of() -> &'static str {
-        "Vault Error"
+        "Collection Error"
     }
 }

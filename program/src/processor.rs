@@ -5,7 +5,6 @@ use solana_program::{
     account_info::AccountInfo, borsh::try_from_slice_unchecked, entrypoint::ProgramResult,
     program_error::ProgramError, pubkey::Pubkey,
 };
-use std::mem;
 
 pub mod add_member;
 pub mod add_member_of;
@@ -60,17 +59,6 @@ pub const MAX_NAME_LENGTH: usize = 64;
 pub const MAX_DESCRIPTION_LENGTH: usize = 512;
 pub const MAX_IMAGE_LENGTH: usize = 2048;
 
-// todo(mvid): update this when struct finalized
-pub const BASE_COLLECTION_DATA_SIZE: usize = 1 // name
-    + 32 // creator
-    + 4 // authorities vec
-    + 32 // initial authority
-    + 1 // advanced
-    + 4 // max_size
-    + 4 // members vec
-    + 4 // member_of vec
-;
-
 bitflags! {
     pub struct AdvancedOptions: u8 {
         const REMOVABLE   = 0b00000001;
@@ -91,14 +79,11 @@ pub struct CollectionData {
     pub max_size: u32,
     pub members: Vec<Pubkey>,
     pub member_of: Vec<CollectionSignature>,
+    pub metadata: String,
 }
 
 impl CollectionData {
     pub fn from_account_info(a: &AccountInfo) -> Result<CollectionData, ProgramError> {
-        if (a.data_len() - BASE_COLLECTION_DATA_SIZE) % mem::size_of::<Pubkey>() != 0 {
-            return Err(CollectionError::DataTypeMismatch.into());
-        }
-
         let collection: CollectionData = try_from_slice_unchecked(&a.data.borrow_mut())?;
         Ok(collection)
     }

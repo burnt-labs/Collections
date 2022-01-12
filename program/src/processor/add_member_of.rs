@@ -16,8 +16,6 @@ use crate::utils::assert_authority;
 #[repr(C)]
 #[derive(Clone, BorshSerialize, BorshDeserialize, PartialEq)]
 pub struct AddMemberOfArgs {
-    // The member being added to the collection
-    pub collection: Pubkey,
     pub signature: [u8; 32],
 }
 
