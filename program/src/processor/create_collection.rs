@@ -83,13 +83,7 @@ pub fn create_collection(
 
     let options = AdvancedOptions::from_bits(args.advanced).unwrap();
     let mut account_size = BASE_COLLECTION_DATA_SIZE;
-    if args.max_size > 0 {
-        if args.members.len() > args.max_size as usize {
-            return Err(CollectionError::CapacityExceeded.into());
-        }
-
-        account_size += args.max_size as usize * mem::size_of::<Pubkey>();
-    } else if (options & AdvancedOptions::EXPANDABLE) == AdvancedOptions::EXPANDABLE {
+    if (options & AdvancedOptions::EXPANDABLE) == AdvancedOptions::EXPANDABLE {
         if args.members.len() == 0 {
             return Err(CollectionError::PermanentlyEmptyCollection.into());
         }
