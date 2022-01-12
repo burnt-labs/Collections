@@ -25,7 +25,8 @@ pub struct CreateCollectionArgs {
     // expandable >> 2: if assets can be appended to the collection
     // arrangeable >> 3: whether asset order can be changed
     pub advanced: u8,
-    // The current authorities of the collection, who can make changes
+    // A u32 that declares what the maximum number of member assets on the chain can be.
+    // If set to 0, the collection has no max size.
     pub max_size: u32,
     // A list of public keys that this collection considers to be members
     pub members: Vec<Pubkey>,
