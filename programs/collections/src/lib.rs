@@ -6,6 +6,7 @@ const PREFIX: &str = "collections";
 
 #[program]
 pub mod collections {
+    use crate::ErrorCode::BumpNotInContext;
     use super::*;
 
     pub fn initialize_collection(
@@ -20,6 +21,7 @@ pub mod collections {
         collection.name = name;
         collection.meta = meta;
         collection.mutable = true;
+        collection.bump = *ctx.bumps.get("collection").ok_or(BumpNotInContext)?;
 
         Ok(())
     }
@@ -29,6 +31,7 @@ pub mod collections {
         asset_mapping.asset = ctx.accounts.asset.key();
         asset_mapping.collection = ctx.accounts.collection.key();
         asset_mapping.meta = meta;
+        asset_mapping.bump = *ctx.bumps.get("asset_mapping").ok_or(BumpNotInContext)?;
 
         Ok(())
     }
@@ -53,30 +56,30 @@ pub mod collections {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8, name: String, meta: String)]
+#[instruction(name: String, meta: String)]
 pub struct InitializeCollection<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
     #[account(
         init,
         payer = creator,
-        space = 32 + 32 + 1 + name.len() + meta.len(),
+        space = 32 + 32 + 1 + name.len() + 1 + meta.len(),
         seeds = [PREFIX.as_bytes(), creator.key().as_ref(), name.as_bytes()],
-        bump = bump,
+        bump,
     )]
     pub collection: Account<'info, Collection>,
     pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8, meta: String)]
+#[instruction(meta: String)]
 pub struct AddAsset<'info> {
     #[account(
         init,
         payer = authority,
-        space = 32 + 32 + meta.len(),
+        space = 32 + 32 + 1 + meta.len(),
         seeds = [PREFIX.as_bytes(), collection.key().as_ref(), asset.key().as_ref()],
-        bump = bump,
+        bump,
     )]
     pub asset_mapping: Account<'info, AssetMapping>,
     #[account(
@@ -92,13 +95,12 @@ pub struct AddAsset<'info> {
 }
 
 #[derive(Accounts)]
-#[instruction(bump: u8)]
 pub struct RemoveAsset<'info> {
     #[account(
         mut,
         close = authority,
         seeds = [PREFIX.as_bytes(), collection.key().as_ref(), asset.key().as_ref()],
-        bump = bump,
+        bump = asset_mapping.bump,
     )]
     pub asset_mapping: Account<'info, AssetMapping>,
     #[account(
@@ -144,6 +146,7 @@ pub struct Collection {
     pub authority: Pubkey,
     pub mutable: bool,
     pub name: String,
+    pub bump: u8,
     pub meta: String,
 }
 
@@ -151,5 +154,14 @@ pub struct Collection {
 pub struct AssetMapping {
     pub collection: Pubkey,
     pub asset: Pubkey,
+    pub bump: u8,
     pub meta: String,
+}
+
+// Errors
+
+#[error]
+pub enum ErrorCode {
+    #[msg("The bump was not found for the account name in this context")]
+    BumpNotInContext,
 }
