@@ -15,18 +15,14 @@ describe('collections', () => {
   const idl: anchor.Idl = JSON.parse(
     require("fs").readFileSync("./target/idl/collections.json", "utf8"));
 
-  const keypair = JSON.parse(
-    require("fs").readFileSync("/Users/peartes/.config/solana/id.json", "utf8"));
-
-
-  const signer = anchor.web3.Keypair.fromSecretKey(Buffer.from(keypair));
+  const signer = anchor.web3.Keypair.generate();
 
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.Provider.env());
 
   const program = anchor.workspace.Collections as Program<Collections>;
 
-  const creator = anchor.getProvider().wallet.publicKey;
+  const creator = signer.publicKey;
 
   const collectionAccount = new anchor.AccountClient(
     idl, idl.accounts[0], program.programId);
@@ -36,6 +32,10 @@ describe('collections', () => {
   );
 
   it('Create Collection', async () => {
+  
+    const getLamports = await program.provider.connection.requestAirdrop(signer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+    await program.provider.connection.confirmTransaction(getLamports);
+
     const colName1 = "Collection V2_1";
     const colName2 = "Collection V2_2";
 
