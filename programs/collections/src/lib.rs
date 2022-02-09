@@ -135,7 +135,6 @@ pub struct FreezeCollection<'info> {
     )]
     pub collection: Account<'info, Collection>,
     pub authority: Signer<'info>,
-    pub new_authority: AccountInfo<'info>,
 }
 
 // Account data definitions
