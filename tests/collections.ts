@@ -11,7 +11,7 @@ const createPda = async (seeds: Array<Uint8Array>, programId: PublicKey) => {
     seeds, programId);
 }
 
-describe('collections', () => {
+describe('test collections', () => {
   const idl: anchor.Idl = JSON.parse(
     require("fs").readFileSync("./target/idl/collections.json", "utf8"));
 
@@ -82,7 +82,7 @@ describe('collections', () => {
 
   });
 
-  it('Add assets to collection', async () => {
+  it('Added assets to collections', async () => {
     const [collectionPDA1] = await createPda(
         [utf8Encoder.encode(PREFIX), creator.publicKey.toBytes(), utf8Encoder.encode(collectionV21)],
         program.programId);
