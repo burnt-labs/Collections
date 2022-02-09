@@ -63,7 +63,7 @@ pub struct InitializeCollection<'info> {
     #[account(
         init,
         payer = creator,
-        space = 32 + 32 + 1 + name.len() + 1 + meta.len(),
+        space = Collection::space(&name, &meta),
         seeds = [PREFIX.as_bytes(), creator.key().as_ref(), name.as_bytes()],
         bump,
     )]
@@ -77,7 +77,7 @@ pub struct AddAsset<'info> {
     #[account(
         init,
         payer = authority,
-        space = 32 + 32 + 1 + meta.len(),
+        space = AssetMapping::space(&meta),
         seeds = [PREFIX.as_bytes(), collection.key().as_ref(), asset.key().as_ref()],
         bump,
     )]
@@ -150,6 +150,25 @@ pub struct Collection {
     pub meta: String,
 }
 
+impl Collection {
+    fn space(name: &str, meta: &str) -> usize{
+        // anchor account discriminator
+        8 +
+        // creator pubkey
+        32 +
+        // authority pubkey
+        32 +
+        // mutable boolean
+        1 +
+        // name String
+        4 + name.len() +
+        // bump u8
+        1 +
+        // meta String
+        4 + meta.len()
+    }
+}
+
 #[account]
 pub struct AssetMapping {
     pub collection: Pubkey,
@@ -157,6 +176,22 @@ pub struct AssetMapping {
     pub bump: u8,
     pub meta: String,
 }
+
+impl AssetMapping {
+    fn space(meta: &str) -> usize{
+        // anchor account discriminator
+        8 +
+        // collection pubkey
+        32 +
+        // asset pubkey
+        32 +
+        // bump u8
+        1 +
+        // meta String
+        4 + meta.len()
+    }
+}
+
 
 // Errors
 
