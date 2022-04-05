@@ -1,12 +1,19 @@
 use anchor_lang::prelude::*;
 
+mod errors;
+mod state;
+mod contexts;
+
+use errors::*;
+use state::*;
+use contexts::*;
+
 declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
 
-const PREFIX: &str = "collections";
 
 #[program]
 pub mod collections {
-    use crate::ErrorCode::BumpNotInContext;
+    use crate::ErrorCode::{BumpNotInContext, PageFull};
     use super::*;
 
     pub fn initialize_collection(
@@ -21,7 +28,20 @@ pub mod collections {
         collection.name = name;
         collection.meta = meta;
         collection.mutable = true;
+        collection.latest_page_index = 0;
         collection.bump = *ctx.bumps.get("collection").ok_or(BumpNotInContext)?;
+
+        Ok(())
+    }
+
+    pub fn add_page(ctx: Context<AddPage>, index: u32) -> ProgramResult {
+        let collection_page = &mut ctx.accounts.collection_page;
+        collection_page.collection = ctx.accounts.collection.key();
+        collection_page.index = index;
+        collection_page.bump = *ctx.bumps.get("collection_page").ok_or(BumpNotInContext)?;
+
+        let collection = &mut ctx.accounts.collection;
+        collection.latest_page_index = index;
 
         Ok(())
     }
@@ -33,10 +53,25 @@ pub mod collections {
         asset_mapping.meta = meta;
         asset_mapping.bump = *ctx.bumps.get("asset_mapping").ok_or(BumpNotInContext)?;
 
+        let collection_page = &mut ctx.accounts.collection_page;
+        if collection_page.current_index == 255 {
+            Err(PageFull.into());
+        }
+        collection_page.assets[collection_page.current_index as usize] = Some(ctx.accounts.asset.key());
+        collection_page.current_index += 1;
+
         Ok(())
     }
 
-    pub fn remove_asset(_ctx: Context<RemoveAsset>) -> ProgramResult {
+    pub fn remove_asset(ctx: Context<RemoveAsset>) -> ProgramResult {
+        let collection_page = &mut ctx.accounts.collection_page;
+
+        for i in 0..collection_page.assets.len() {
+            if collection_page.assets[i] == Some(ctx.accounts.asset.key()) {
+                collection_page.assets[i] = None;
+            }
+        }
+
         Ok(())
     }
 
@@ -53,149 +88,4 @@ pub mod collections {
 
         Ok(())
     }
-}
-
-#[derive(Accounts)]
-#[instruction(name: String, meta: String)]
-pub struct InitializeCollection<'info> {
-    #[account(mut)]
-    pub creator: Signer<'info>,
-    #[account(
-        init,
-        payer = creator,
-        space = Collection::space(&name, &meta),
-        seeds = [PREFIX.as_bytes(), creator.key().as_ref(), name.as_bytes()],
-        bump,
-    )]
-    pub collection: Account<'info, Collection>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-#[instruction(meta: String)]
-pub struct AddAsset<'info> {
-    #[account(
-        init,
-        payer = authority,
-        space = AssetMapping::space(&meta),
-        seeds = [PREFIX.as_bytes(), collection.key().as_ref(), asset.key().as_ref()],
-        bump,
-    )]
-    pub asset_mapping: Account<'info, AssetMapping>,
-    #[account(
-        mut,
-        has_one = authority,
-        constraint = collection.mutable,
-    )]
-    pub collection: Account<'info, Collection>,
-    #[account(mut)]
-    pub authority: Signer<'info>,
-    pub asset: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct RemoveAsset<'info> {
-    #[account(
-        mut,
-        close = authority,
-        seeds = [PREFIX.as_bytes(), collection.key().as_ref(), asset.key().as_ref()],
-        bump = asset_mapping.bump,
-    )]
-    pub asset_mapping: Account<'info, AssetMapping>,
-    #[account(
-        mut,
-        has_one = authority,
-        constraint = collection.mutable,
-    )]
-    pub collection: Account<'info, Collection>,
-    #[account(mut)]
-    pub authority: Signer<'info>,
-    pub asset: AccountInfo<'info>,
-    pub system_program: Program<'info, System>,
-}
-
-#[derive(Accounts)]
-pub struct UpdateAuthority<'info> {
-    #[account(
-        mut,
-        has_one = authority,
-        constraint = collection.mutable,
-    )]
-    pub collection: Account<'info, Collection>,
-    pub authority: Signer<'info>,
-    pub new_authority: AccountInfo<'info>,
-}
-
-#[derive(Accounts)]
-pub struct FreezeCollection<'info> {
-    #[account(
-        mut,
-        has_one = authority
-    )]
-    pub collection: Account<'info, Collection>,
-    pub authority: Signer<'info>,
-}
-
-// Account data definitions
-
-#[account]
-pub struct Collection {
-    pub creator: Pubkey,
-    pub authority: Pubkey,
-    pub mutable: bool,
-    pub name: String,
-    pub bump: u8,
-    pub meta: String,
-}
-
-impl Collection {
-    fn space(name: &str, meta: &str) -> usize{
-        // anchor account discriminator
-        8 +
-        // creator pubkey
-        32 +
-        // authority pubkey
-        32 +
-        // mutable boolean
-        1 +
-        // name String
-        4 + name.len() +
-        // bump u8
-        1 +
-        // meta String
-        4 + meta.len()
-    }
-}
-
-#[account]
-pub struct AssetMapping {
-    pub collection: Pubkey,
-    pub asset: Pubkey,
-    pub bump: u8,
-    pub meta: String,
-}
-
-impl AssetMapping {
-    fn space(meta: &str) -> usize{
-        // anchor account discriminator
-        8 +
-        // collection pubkey
-        32 +
-        // asset pubkey
-        32 +
-        // bump u8
-        1 +
-        // meta String
-        4 + meta.len()
-    }
-}
-
-
-// Errors
-
-#[error]
-pub enum ErrorCode {
-    #[msg("The bump was not found for the account name in this context")]
-    BumpNotInContext,
 }
